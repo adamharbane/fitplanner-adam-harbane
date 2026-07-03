@@ -1,8 +1,17 @@
-import { createApp } from "./app.js";
-import { PORT } from "./config/env.js";
+import { Container } from "./container/container.js";
+import { envConfig } from "./config/env.js";
 
-const app = createApp();
+class Server {
+  start(): void {
+    const container = Container.getInstance();
+    const app = container.createExpressApp();
 
-app.listen(PORT, () => {
-  console.log(`API FitPlanner disponible sur http://localhost:${PORT}`);
-});
+    app.listen(envConfig.port, () => {
+      console.log(
+        `API FitPlanner disponible sur http://localhost:${envConfig.port}`,
+      );
+    });
+  }
+}
+
+new Server().start();

@@ -1,10 +1,21 @@
 import { Router } from "express";
-import { workoutRoutes } from "./workout.routes.js";
+import type { WorkoutController } from "../controllers/workout.controller.js";
+import { ApiResponseBuilder } from "../../models/api-response.model.js";
+import { createWorkoutRoutes } from "./workout.routes.js";
 
-export const apiRoutes = Router();
+export class ApiRouter {
+  readonly router: Router;
 
-apiRoutes.get("/health", (_req, res) => {
-  res.json({ success: true, data: { status: "ok" } });
-});
+  constructor(workoutController: WorkoutController) {
+    this.router = Router();
+    this.registerRoutes(workoutController);
+  }
 
-apiRoutes.use("/workouts", workoutRoutes);
+  private registerRoutes(workoutController: WorkoutController): void {
+    this.router.get("/health", (_req, res) => {
+      res.json(ApiResponseBuilder.success({ status: "ok" }));
+    });
+
+    this.router.use("/workouts", createWorkoutRoutes(workoutController));
+  }
+}

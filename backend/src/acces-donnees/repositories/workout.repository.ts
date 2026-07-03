@@ -1,10 +1,15 @@
 import type { Workout } from "../../models/workout.model.js";
-import { workouts } from "../sources/workout.source.js";
+import type { IWorkoutDataSource } from "../../interfaces/workout-data-source.interface.js";
+import type { IWorkoutRepository } from "../../interfaces/workout-repository.interface.js";
 
-export function findAllWorkouts(): Workout[] {
-  return workouts;
-}
+export class WorkoutRepository implements IWorkoutRepository {
+  constructor(private readonly dataSource: IWorkoutDataSource) {}
 
-export function findWorkoutById(id: number): Workout | undefined {
-  return workouts.find((workout) => workout.id === id);
+  findAll(): Workout[] {
+    return this.dataSource.getAll();
+  }
+
+  findById(id: number): Workout | undefined {
+    return this.dataSource.getAll().find((workout) => workout.id === id);
+  }
 }

@@ -1,12 +1,15 @@
 import { Router } from "express";
-import {
-  getAllCategories,
-  getAllWorkouts,
-  getOneWorkout,
-} from "../controllers/workout.controller.js";
+import type { WorkoutController } from "../controllers/workout.controller.js";
 
-export const workoutRoutes = Router();
+export function createWorkoutRoutes(controller: WorkoutController): Router {
+  const router = Router();
 
-workoutRoutes.get("/categories", getAllCategories);
-workoutRoutes.get("/", getAllWorkouts);
-workoutRoutes.get("/:id", getOneWorkout);
+  router.get(
+    "/categories",
+    controller.getAllCategories.bind(controller),
+  );
+  router.get("/", controller.getAllWorkouts.bind(controller));
+  router.get("/:id", controller.getOneWorkout.bind(controller));
+
+  return router;
+}

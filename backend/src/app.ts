@@ -1,18 +1,32 @@
 import cors from "cors";
-import express from "express";
-import { CORS_ORIGIN } from "./config/env.js";
-import { apiRoutes } from "./presentation/routes/index.js";
+import express, { type Express } from "express";
+import type { ApiRouter } from "./presentation/routes/index.js";
+import { envConfig } from "./config/env.js";
+import { ApiResponseBuilder } from "./models/api-response.model.js";
 
-export function createApp() {
-  const app = express();
+export class App {
+  readonly expressApp: Express;
 
-  app.use(cors({ origin: CORS_ORIGIN }));
-  app.use(express.json());
-  app.use("/api", apiRoutes);
+  constructor(apiRouter: ApiRouter) {
+    this.expressApp = express();
+    this.configureMiddleware();
+    this.configureRoutes(apiRouter);
+  }
 
-  app.use((_req, res) => {
-    res.status(404).json({ success: false, message: "Route introuvable" });
-  });
+  private configureMiddleware(): void {
+    this.expressApp.use(cors({ origin: envConfig.corsOrigin }));
+    this.expressApp.use(express.json());
+  }
 
-  return app;
+  private configureRoutes(apiRouter: ApiRouter): void {
+    this.expressApp.use("/api", apiRouter.router);
+
+    this.expressApp.use((_req, res) => {
+      res.status(404).json(ApiResponseBuilder.error("Route introuvable"));
+    });
+  }
+}
+
+export function createApp(apiRouter: ApiRouter): Express {
+  return new App(apiRouter).expressApp;
 }

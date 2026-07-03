@@ -1,33 +1,30 @@
-import type {
-  Workout,
-  WorkoutFilters,
-} from "../../models/workout.model.js";
-import {
-  findAllWorkouts,
-  findWorkoutById,
-} from "../../acces-donnees/repositories/workout.repository.js";
+import type { Workout, WorkoutFilters } from "../../models/workout.model.js";
+import type { IWorkoutRepository } from "../../interfaces/workout-repository.interface.js";
+import type { IWorkoutService } from "../../interfaces/workout-service.interface.js";
+import { WorkoutFilterFactory } from "../filters/workout-filter.factory.js";
+import { WorkoutFilterPipeline } from "../filters/workout-filter.pipeline.js";
 
-export function getWorkouts(filters: WorkoutFilters): Workout[] {
-  let result = findAllWorkouts();
+export class WorkoutService implements IWorkoutService {
+  constructor(private readonly repository: IWorkoutRepository) {}
 
-  if (filters.category) {
-    result = result.filter((workout) => workout.category === filters.category);
+  getWorkouts(filters: WorkoutFilters): Workout[] {
+    const strategies = WorkoutFilterFactory.createFromFilters(filters);
+    const pipeline = new WorkoutFilterPipeline(strategies);
+
+    const result = pipeline.apply(this.repository.findAll());
+
+    return result.sort((a, b) => a.name.localeCompare(b.name, "fr"));
   }
 
-  if (filters.maxDuration !== undefined) {
-    result = result.filter((workout) => workout.duration <= filters.maxDuration!);
+  getWorkoutById(id: number): Workout | null {
+    return this.repository.findById(id) ?? null;
   }
 
-  return result.sort((a, b) => a.name.localeCompare(b.name, "fr"));
-}
+  getCategories(): string[] {
+    const categories = this.repository
+      .findAll()
+      .map((workout) => workout.category);
 
-export function getWorkoutById(id: number): Workout | null {
-  return findWorkoutById(id) ?? null;
-}
-
-export function getCategories(): string[] {
-  const categories = findAllWorkouts().map((workout) => workout.category);
-  const uniqueCategories = [...new Set(categories)];
-
-  return uniqueCategories.sort((a, b) => a.localeCompare(b, "fr"));
+    return [...new Set(categories)].sort((a, b) => a.localeCompare(b, "fr"));
+  }
 }

@@ -1,12 +1,13 @@
-import type { Workout } from "../../models/workout.model.js";
+import { Workout } from "../../models/workout.model.js";
+import type { IWorkoutDataSource } from "../../interfaces/workout-data-source.interface.js";
 
-export const workouts: Workout[] = [
+const RAW_WORKOUTS = [
   {
     id: 1,
     name: "Cardio express",
     category: "Cardio",
     duration: 20,
-    difficulty: "Débutant",
+    difficulty: "Débutant" as const,
     equipment: false,
   },
   {
@@ -14,7 +15,7 @@ export const workouts: Workout[] = [
     name: "Course à pied",
     category: "Cardio",
     duration: 45,
-    difficulty: "Intermédiaire",
+    difficulty: "Intermédiaire" as const,
     equipment: false,
   },
   {
@@ -22,7 +23,7 @@ export const workouts: Workout[] = [
     name: "Full body maison",
     category: "Musculation",
     duration: 30,
-    difficulty: "Débutant",
+    difficulty: "Débutant" as const,
     equipment: false,
   },
   {
@@ -30,7 +31,7 @@ export const workouts: Workout[] = [
     name: "Haut du corps",
     category: "Musculation",
     duration: 40,
-    difficulty: "Intermédiaire",
+    difficulty: "Intermédiaire" as const,
     equipment: true,
   },
   {
@@ -38,7 +39,7 @@ export const workouts: Workout[] = [
     name: "HIIT intense",
     category: "Cardio",
     duration: 25,
-    difficulty: "Avancé",
+    difficulty: "Avancé" as const,
     equipment: false,
   },
   {
@@ -46,7 +47,7 @@ export const workouts: Workout[] = [
     name: "Renforcement abdos",
     category: "Renforcement",
     duration: 15,
-    difficulty: "Débutant",
+    difficulty: "Débutant" as const,
     equipment: false,
   },
   {
@@ -54,7 +55,7 @@ export const workouts: Workout[] = [
     name: "Stretching complet",
     category: "Souplesse",
     duration: 20,
-    difficulty: "Débutant",
+    difficulty: "Débutant" as const,
     equipment: false,
   },
   {
@@ -62,7 +63,19 @@ export const workouts: Workout[] = [
     name: "Yoga flow",
     category: "Souplesse",
     duration: 35,
-    difficulty: "Intermédiaire",
+    difficulty: "Intermédiaire" as const,
     equipment: false,
   },
 ];
+
+export class WorkoutSource implements IWorkoutDataSource {
+  private readonly workouts: Workout[];
+
+  constructor() {
+    this.workouts = RAW_WORKOUTS.map((data) => Workout.fromPlain(data));
+  }
+
+  getAll(): Workout[] {
+    return [...this.workouts];
+  }
+}

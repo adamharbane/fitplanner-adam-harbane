@@ -1,44 +1,44 @@
 import type { Request, Response } from "express";
-import {
-  getCategories,
-  getWorkoutById,
-  getWorkouts,
-} from "../../metier/services/workout.service.js";
+import type { IWorkoutService } from "../../interfaces/workout-service.interface.js";
+import type { IWorkoutRequestParser } from "../../interfaces/workout-request-parser.interface.js";
+import { ApiResponseBuilder } from "../../models/api-response.model.js";
 
-export function getAllWorkouts(req: Request, res: Response): void {
-  const category =
-    typeof req.query.category === "string" ? req.query.category : undefined;
+export class WorkoutController {
+  constructor(
+    private readonly workoutService: IWorkoutService,
+    private readonly requestParser: IWorkoutRequestParser,
+  ) {}
 
-  const maxDuration =
-    typeof req.query.maxDuration === "string"
-      ? Number(req.query.maxDuration)
-      : undefined;
+  getAllWorkouts(req: Request, res: Response): void {
+    const filters = this.requestParser.parseFilters(req);
+    const workouts = this.workoutService.getWorkouts(filters);
 
-  const workouts = getWorkouts({ category, maxDuration });
-
-  res.json({ success: true, data: workouts });
-}
-
-export function getOneWorkout(req: Request, res: Response): void {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    res.status(400).json({ success: false, message: "Id invalide" });
-    return;
+    res.json(
+      ApiResponseBuilder.success(workouts.map((workout) => workout.toJSON())),
+    );
   }
 
-  const workout = getWorkoutById(id);
+  getOneWorkout(req: Request, res: Response): void {
+    const id = this.requestParser.parseId(req);
 
-  if (!workout) {
-    res.status(404).json({ success: false, message: "Séance introuvable" });
-    return;
+    if (id === null) {
+      res.status(400).json(ApiResponseBuilder.error("Id invalide"));
+      return;
+    }
+
+    const workout = this.workoutService.getWorkoutById(id);
+
+    if (!workout) {
+      res.status(404).json(ApiResponseBuilder.error("Séance introuvable"));
+      return;
+    }
+
+    res.json(ApiResponseBuilder.success(workout.toJSON()));
   }
 
-  res.json({ success: true, data: workout });
-}
+  getAllCategories(_req: Request, res: Response): void {
+    const categories = this.workoutService.getCategories();
 
-export function getAllCategories(_req: Request, res: Response): void {
-  const categories = getCategories();
-
-  res.json({ success: true, data: categories });
+    res.json(ApiResponseBuilder.success(categories));
+  }
 }
