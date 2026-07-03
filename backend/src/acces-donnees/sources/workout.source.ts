@@ -1,0 +1,68 @@
+import type { Workout } from "../../models/workout.model.js";
+
+export const workouts: Workout[] = [
+  {
+    id: 1,
+    name: "Cardio express",
+    category: "Cardio",
+    duration: 20,
+    difficulty: "Débutant",
+    equipment: false,
+  },
+  {
+    id: 2,
+    name: "Course à pied",
+    category: "Cardio",
+    duration: 45,
+    difficulty: "Intermédiaire",
+    equipment: false,
+  },
+  {
+    id: 3,
+    name: "Full body maison",
+    category: "Musculation",
+    duration: 30,
+    difficulty: "Débutant",
+    equipment: false,
+  },
+  {
+    id: 4,
+    name: "Haut du corps",
+    category: "Musculation",
+    duration: 40,
+    difficulty: "Intermédiaire",
+    equipment: true,
+  },
+  {
+    id: 5,
+    name: "HIIT intense",
+    category: "Cardio",
+    duration: 25,
+    difficulty: "Avancé",
+    equipment: false,
+  },
+  {
+    id: 6,
+    name: "Renforcement abdos",
+    category: "Renforcement",
+    duration: 15,
+    difficulty: "Débutant",
+    equipment: false,
+  },
+  {
+    id: 7,
+    name: "Stretching complet",
+    category: "Souplesse",
+    duration: 20,
+    difficulty: "Débutant",
+    equipment: false,
+  },
+  {
+    id: 8,
+    name: "Yoga flow",
+    category: "Souplesse",
+    duration: 35,
+    difficulty: "Intermédiaire",
+    equipment: false,
+  },
+];
