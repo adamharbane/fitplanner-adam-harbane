@@ -14,7 +14,12 @@ export class WorkoutController {
     const workouts = this.workoutService.getWorkouts(filters);
 
     res.json(
-      ApiResponseBuilder.success(workouts.map((workout) => workout.toJSON())),
+      ApiResponseBuilder.success(
+        workouts.map(({ workout, score }) => ({
+          ...workout.toJSON(),
+          score,
+        })),
+      ),
     );
   }
 

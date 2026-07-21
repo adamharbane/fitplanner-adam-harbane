@@ -17,7 +17,24 @@ export class WorkoutRequestParser implements IWorkoutRequestParser {
         ? rawMaxDuration
         : undefined;
 
-    return { category, maxDuration };
+    const favoriteIds = this.parseFavoriteIds(req);
+
+    return { category, maxDuration, favoriteIds };
+  }
+
+  private parseFavoriteIds(req: Request): number[] | undefined {
+    const rawValue = req.query.favoriteIds;
+
+    if (typeof rawValue !== "string" || rawValue.trim() === "") {
+      return undefined;
+    }
+
+    const ids = rawValue
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((id) => !Number.isNaN(id));
+
+    return ids.length > 0 ? ids : undefined;
   }
 
   parseId(req: Request): number | null {

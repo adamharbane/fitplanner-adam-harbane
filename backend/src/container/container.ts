@@ -1,5 +1,6 @@
 import { WorkoutSource } from "../acces-donnees/sources/workout.source.js";
 import { WorkoutRepository } from "../acces-donnees/repositories/workout.repository.js";
+import { BarycenterScoringStrategy } from "../metier/scoring/barycenter-scoring.strategy.js";
 import { WorkoutService } from "../metier/services/workout.service.js";
 import { WorkoutController } from "../presentation/controllers/workout.controller.js";
 import { WorkoutRequestParser } from "../presentation/parsers/workout-request.parser.js";
@@ -17,7 +18,8 @@ export class Container {
   private constructor() {
     const dataSource = new WorkoutSource();
     const repository = new WorkoutRepository(dataSource);
-    const service = new WorkoutService(repository);
+    const scoringStrategy = new BarycenterScoringStrategy();
+    const service = new WorkoutService(repository, scoringStrategy);
     const requestParser = new WorkoutRequestParser();
 
     this.workoutController = new WorkoutController(service, requestParser);

@@ -12,6 +12,16 @@ export interface IWorkout {
 export interface WorkoutFilters {
   category?: string;
   maxDuration?: number;
+  favoriteIds?: number[];
+}
+
+export interface IScoredWorkout extends IWorkout {
+  score: number;
+}
+
+export interface ScoredWorkout {
+  workout: Workout;
+  score: number;
 }
 
 export class Workout implements IWorkout {

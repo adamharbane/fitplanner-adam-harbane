@@ -1,3 +1,5 @@
+import { Catalogue } from "./components/Catalogue";
+
 export default function App() {
-  return <h1>FitPlanner</h1>;
+  return <Catalogue />;
 }
