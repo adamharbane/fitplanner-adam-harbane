@@ -2,9 +2,32 @@ import { API_BASE_URL } from "../config";
 import type { ApiResponse } from "../types/api";
 import type { ScoredWorkout } from "../types/workout";
 
+async function parseApiResponse<T>(response: Response): Promise<ApiResponse<T>> {
+  if (!response.ok) {
+    throw new Error(
+      response.status === 502 || response.status === 503 || response.status === 504
+        ? "Le backend ne répond pas. Lancez-le avec : cd backend && npm run dev"
+        : `Erreur HTTP ${response.status}`,
+    );
+  }
+
+  const text = await response.text();
+  if (!text) {
+    throw new Error(
+      "Le backend ne répond pas. Lancez-le avec : cd backend && npm run dev",
+    );
+  }
+
+  try {
+    return JSON.parse(text) as ApiResponse<T>;
+  } catch {
+    throw new Error("Réponse API invalide. Vérifiez que le backend tourne.");
+  }
+}
+
 export async function fetchCategories(): Promise<string[]> {
   const response = await fetch(`${API_BASE_URL}/workouts/categories`);
-  const payload = (await response.json()) as ApiResponse<string[]>;
+  const payload = await parseApiResponse<string[]>(response);
 
   if (!payload.success) {
     throw new Error(payload.message);
@@ -34,7 +57,7 @@ export async function fetchWorkouts(params: {
 
   const url = `${API_BASE_URL}/workouts${query.size > 0 ? `?${query}` : ""}`;
   const response = await fetch(url);
-  const payload = (await response.json()) as ApiResponse<ScoredWorkout[]>;
+  const payload = await parseApiResponse<ScoredWorkout[]>(response);
 
   if (!payload.success) {
     throw new Error(payload.message);

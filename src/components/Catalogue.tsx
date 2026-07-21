@@ -66,8 +66,8 @@ export function Catalogue() {
               <strong>Erreur API</strong>
               <p>{error}</p>
               <p className="alert__hint">
-                Vérifiez que le backend tourne sur{" "}
-                <code>http://localhost:3001</code>
+                Lancez le backend dans un terminal séparé :{" "}
+                <code>cd backend &amp;&amp; npm run dev</code>
               </p>
             </div>
           )}
