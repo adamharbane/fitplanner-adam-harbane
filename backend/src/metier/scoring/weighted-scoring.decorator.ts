@@ -7,28 +7,47 @@ import {
   type WorkoutVector,
 } from "./workout-vector.utils.js";
 
-function euclideanDistance(a: WorkoutVector, b: WorkoutVector): number {
+export interface ScoringWeights {
+  duration: number;
+  difficulty: number;
+  equipment: number;
+  category: number;
+}
+
+function weightedEuclideanDistance(
+  a: WorkoutVector,
+  b: WorkoutVector,
+  weights: ScoringWeights,
+): number {
   const dDuration = a.duration - b.duration;
   const dDifficulty = a.difficulty - b.difficulty;
   const dEquipment = a.equipment - b.equipment;
   const dCategory = a.category - b.category;
 
   return Math.sqrt(
-    dDuration ** 2 + dDifficulty ** 2 + dEquipment ** 2 + dCategory ** 2,
+    weights.duration * dDuration ** 2 +
+      weights.difficulty * dDifficulty ** 2 +
+      weights.equipment * dEquipment ** 2 +
+      weights.category * dCategory ** 2,
   );
 }
 
-export class BarycenterScoringStrategy implements IScoringStrategy {
+export class WeightedScoringDecorator implements IScoringStrategy {
+  constructor(
+    private readonly scoringStrategy: IScoringStrategy,
+    private readonly weights: ScoringWeights,
+  ) {}
+
   score(workouts: Workout[], favoriteIds: number[]): ScoredWorkout[] {
-    if (workouts.length === 0) {
-      return [];
+    if (favoriteIds.length === 0 || workouts.length === 0) {
+      return this.scoringStrategy.score(workouts, favoriteIds);
     }
 
     const vectors = toVectors(workouts);
     const favoriteVectors = resolveFavoriteVectors(vectors, favoriteIds);
 
     if (favoriteVectors.length === 0) {
-      return workouts.map((workout) => ({ workout, score: 0 }));
+      return this.scoringStrategy.score(workouts, favoriteIds);
     }
 
     const centroid = computeCentroid(favoriteVectors);
@@ -40,7 +59,11 @@ export class BarycenterScoringStrategy implements IScoringStrategy {
           return { workout, score: 0 };
         }
 
-        const distance = euclideanDistance(vector, centroid);
+        const distance = weightedEuclideanDistance(
+          vector,
+          centroid,
+          this.weights,
+        );
         const score = Number((1 / (1 + distance)).toFixed(4));
 
         return { workout, score };

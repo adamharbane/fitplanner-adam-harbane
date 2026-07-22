@@ -1,10 +1,10 @@
-import { Container } from "./container/container.js";
+import { AppSingleton } from "./container/app.singleton.js";
 import { envConfig } from "./config/env.js";
 
 class Server {
   start(): void {
-    const container = Container.getInstance();
-    const app = container.createExpressApp();
+    const appSingleton = AppSingleton.getInstance();
+    const app = appSingleton.createExpressApp();
 
     app.listen(envConfig.port, () => {
       console.log(

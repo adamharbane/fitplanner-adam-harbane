@@ -198,34 +198,35 @@ Front (filtres + favoris localStorage)
 
 ### Design patterns
 
-| Pattern | Où | Rôle |
-|---------|-----|------|
-| **Strategy** | `IWorkoutFilter` / `IScoringStrategy` | Filtres et algorithmes de scoring interchangeables |
-| **Factory** | `WorkoutFilterFactory` | Instancie les filtres selon les paramètres reçus |
-| **Pipeline** | `WorkoutFilterPipeline` | Enchaîne les filtres de manière composable |
-| **Repository** | `IWorkoutRepository` | Découple l'accès aux données de la logique métier |
-| **Dependency Injection** | `Container` | Assemble les dépendances (repository, scoring, service) |
+| Famille | Pattern | Où | Rôle |
+|---------|---------|-----|------|
+| Création | **Factory** | `WorkoutFilterFactory` | Instancie les filtres selon les paramètres reçus |
+| Création | **Singleton** | `AppSingleton.getInstance()` | Une seule instance pour assembler l'application |
+| Structure | **Decorator** | `WeightedScoringDecorator` | Ajoute le scoring pondéré autour de la Strategy |
+| Comportement | **Strategy** | `IScoringStrategy` / `BarycenterScoringStrategy` | Algorithme de scoring interchangeable |
+| Comportement | **Chain of responsibility** | `WorkoutFilterPipeline` | Enchaîne les filtres (catégorie, durée) |
 
-Pour ajouter un autre algorithme de scoring (ex. cosinus), il suffit d'implémenter `IScoringStrategy` et de l'injecter dans `WorkoutService` à la place de `BarycenterScoringStrategy`.
+Pour ajouter un autre algorithme de scoring (ex. cosinus), il suffit d'implémenter `IScoringStrategy` et de l'injecter (éventuellement décoré) dans `WorkoutService`.
 
-### Algorithme du barycentre
+### Algorithme du barycentre (score pondéré via Decorator)
 
 Chaque séance est représentée par **4 attributs numériques normalisés** (min-max) :
 
-| Attribut | Source |
-|----------|--------|
-| Durée | `duration` normalisée sur le catalogue filtré |
-| Difficulté | `Débutant=1`, `Intermédiaire=2`, `Avancé=3` |
-| Matériel | `0` (sans) ou `1` (avec) |
-| Catégorie | index de la catégorie normalisé |
+| Attribut | Source | Poids (`WeightedScoringDecorator`) |
+|----------|--------|-------------------------------------|
+| Durée | `duration` normalisée sur le catalogue filtré | 1.5 |
+| Difficulté | `Débutant=1`, `Intermédiaire=2`, `Avancé=3` | 1.2 |
+| Matériel | `0` (sans) ou `1` (avec) | 0.8 |
+| Catégorie | index de la catégorie normalisé | 2.0 |
 
 **Profil utilisateur** = barycentre (moyenne vectorielle) des séances favorites.
 
-**Score** = `1 / (1 + distance euclidienne)` entre la séance et le barycentre.
+**Distance** = distance euclidienne **pondérée** :
+`√(w_durée·Δ² + w_difficulté·Δ² + w_matériel·Δ² + w_catégorie·Δ²)`
 
-**Complexité** : O(n) pour la vectorisation + O(f) pour le centroïde + O(n) pour le scoring, soit **O(n)** avec n = nombre de séances filtrées et f = nombre de favoris.
+**Score** = `1 / (1 + distance)` entre la séance et le barycentre.
 
-Sans favoris, l'API retourne un tri alphabétique avec `score: 0`.
+Sans favoris, le Decorator délègue à la Strategy de base (tri alphabétique / score 0).
 
 ## Technologies
 
